@@ -1,5 +1,7 @@
+import asyncio
 from sherlock_lib import search_target
 
-def searchUser(username):
-    result = search_target(username,sfw=True)
+async def searchUser(username):
+    loop = asyncio.get_event_loop()
+    result = await loop.run_in_executor(None, search_target, username)
     return result

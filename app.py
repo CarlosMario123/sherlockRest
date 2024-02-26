@@ -1,28 +1,20 @@
-from flask import Flask, request, jsonify
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
 from sherlock import searchUser
 
-app = Flask(__name__)
+app = FastAPI()
 
-@app.route('/search', methods=['POST'])
-def handle_post_request():
-    if request.method == 'POST':
-        # Obtener los datos JSON del cuerpo de la solicitud sin verificar el encabezado Content-Type
-        data = request.json
-
-        # Verificar si se proporcionó el nombre en los datos recibidos
-        if data and 'name' in data:
-            nombre = data['name']
-             
-            resultado = searchUser(nombre)
-            
-            response = {'resultados': resultado}
-
-            # Devolver una respuesta al cliente en formato JSON
-            return jsonify(response)
-        else:
-            return jsonify({'error': 'No se proporcionó un nombre válido en la solicitud'})
+@app.post("/search")
+async def handle_post_request(data: dict):
+    # Verificar si se proporcionó el nombre en los datos recibidos
+    if data and 'name' in data:
+        nombre = data['name']
+        resultado = await searchUser(nombre)
+        response = {'resultados': resultado}
+        return JSONResponse(content=response)
     else:
-        return jsonify({'error': 'Se esperaba una solicitud POST'})
+        raise HTTPException(status_code=400, detail="No se proporcionó un nombre válido en la solicitud")
 
-if __name__ == '__main__':
-    app.run()
+if __name__ == "__main__":
+    import uvicorn#para trabajar con asyncronia
+    uvicorn.run(app, host="0.0.0.0", port=8000)
